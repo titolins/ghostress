@@ -39,7 +39,15 @@ func NewRequest(method string, uri string, dataFile string) *Request {
 		panic("Failed to read json file")
 	}
 
-	// build the buffer from the []byte
+	/* Now using `fan.Reader` considering golang's buffer isn't thread safe. Had
+	to implement the constructor below, considering `r` and `mux` inside Reader
+	are unexported.
+	```
+	func NewReader(r io.Reader) *Reader {
+		return &Reader{r, []byte(nil), *new(sync.Mutex)}
+	}
+	```
+	*/
 	dataBuffer := fan.NewReader(bytes.NewBuffer(data))
 
 	return &Request{
