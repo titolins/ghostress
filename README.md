@@ -8,3 +8,4 @@ Simple golang application to perform multiple concurrent POST/PUT HTTP requests 
 $ ./ghostress n_requests timeout(ms) method endpoint json_file
 ```
 
+Author: Tito Lins
