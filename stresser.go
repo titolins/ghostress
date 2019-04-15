@@ -14,7 +14,7 @@ type Stresser struct {
 	Timeout time.Duration
 }
 
-// Makes a single request
+// req -> Makes a single request
 func (stresser *Stresser) req(ch chan<- string) {
 	var res string
 	httpClient := &http.Client{}
