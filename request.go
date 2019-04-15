@@ -3,7 +3,7 @@ package main
 
 import (
 	"bytes"
-	fan "gist.github.com/jmackie/11570bdcd8a4c10d72619a5e1f21c5f8.git"
+	fan "gist.github.com/titolins/4a0af7462eeb6bb76599e608a49d04b0.git"
 	"io/ioutil"
 	"net/http"
 )
