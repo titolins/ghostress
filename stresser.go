@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Stresser -> Stresser struct representing basically a batch of requests
+// Stresser -> Describes and runs the request batch
 type Stresser struct {
 	Request *Request
 	NReq    int
@@ -36,7 +36,7 @@ func (stresser *Stresser) req(ch chan<- string) {
 	ch <- res
 }
 
-// Stress -> stresses the server by making the request batch requested
+// Stress -> Starts the batch request
 func (stresser *Stresser) Stress() {
 	ch := make(chan string)
 
