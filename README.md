@@ -11,7 +11,9 @@ The following flags are defined:
 * `uri`     -> request address (defaults to `http://localhost:3000/`)
 * `data`    -> path to data file to be sent as payload (defaults to `test_data.json`)
 
-* Example:
+Running `./ghostress [-h|--help]` also works
+
+Example:
 ```bash
 $ # presuming you have a json payload file named `test_data.json` in the same
 $ # folder, this will send a single PUT request to the uri defined
