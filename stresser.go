@@ -11,7 +11,7 @@ import (
 type Stresser struct {
 	Request *Request
 	NReq    int
-	Timeout time.Duration
+	Timeout int
 }
 
 // req -> Makes a single request
@@ -45,7 +45,7 @@ func (stresser *Stresser) Stress() {
 	for i := 0; i < stresser.NReq; i++ {
 		fmt.Printf("i = %+v\n", i)
 		go stresser.req(ch)
-		time.Sleep(stresser.Timeout)
+		time.Sleep(time.Duration(stresser.Timeout) * time.Second)
 	}
 
 	for i := 0; i < stresser.NReq; i++ {
