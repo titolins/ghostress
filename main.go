@@ -1,31 +1,33 @@
 package main
 
 import (
-	"os"
-	"strconv"
-	"time"
+	"flag"
 )
 
 func main() {
-	var nReq int
-	var timeout int
-	var err error
+	var (
+		nReq    int
+		timeout int
+		method  string
+		uri     string
+		data    string
+	)
 
-	if nReq, err = strconv.Atoi(os.Args[1]); err != nil {
-		panic("nReq should be an int")
-	}
-	if timeout, err = strconv.Atoi(os.Args[2]); err != nil {
-		panic("timeout should be an int")
-	}
-	method := os.Args[3]
-	uri := os.Args[4]
-	dataFile := os.Args[5]
-	req := NewRequest(method, uri, dataFile)
+	flag.IntVar(&nReq, "n_req", 1, "number of requests to be made to server")
+	flag.IntVar(&timeout, "timeout", 0, "timeout between requests (seconds)")
+	flag.StringVar(&method, "method", "PUT", "method to be used (POST or PUT)")
+	flag.StringVar(&uri, "uri", "http://localhost:3000", "request uri")
+	flag.StringVar(
+		&data, "data", "test_data.json", "json file with the data to be sent")
+
+	flag.Parse()
+
+	req := NewRequest(method, uri, data)
 
 	stresser := &Stresser{
 		Request: req,
 		NReq:    nReq,
-		Timeout: time.Duration(timeout)}
+		Timeout: timeout}
 
 	stresser.Stress()
 
