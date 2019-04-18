@@ -4,7 +4,6 @@ package main
 import (
 	"bytes"
 	fan "gist.github.com/titolins/4a0af7462eeb6bb76599e608a49d04b0.git"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -30,15 +29,10 @@ func panicIfNotMethodAccepted(method string) {
 
 // NewRequest -> builds and returns a http.Request wrapper (so we can generate
 // those easily later when actually making requests)
-func NewRequest(method string, uri string, dataFile string) *Request {
+func NewRequest(method string, uri string, data []byte) *Request {
 	// check if method accepted
 	panicIfNotMethodAccepted(method)
 
-	// reads json file
-	data, err := ioutil.ReadFile(dataFile)
-	if err != nil {
-		panic("Failed to read json file")
-	}
 	/* Now using `fan.Reader` considering golang's buffer isn't thread safe. Had
 	to implement the constructor below, considering `r` and `mux` inside Reader
 	are unexported.
