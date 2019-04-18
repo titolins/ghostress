@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"ghostress/json"
+	"github.com/titolins/ghostress/json"
 	"io/ioutil"
 )
 
