@@ -30,6 +30,7 @@ func generateRandomIntLen(l int) int {
 	return randomInt(min, max)
 }
 
+// generateRandomBytes -> returns a random byte slice
 func generateRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 
