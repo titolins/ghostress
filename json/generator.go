@@ -13,6 +13,8 @@ const (
 	defaultIntSize    = 5
 )
 
+type jsonObject map[string]interface{}
+
 // Generator -> Receives a Descriptor and generates the appropriate json payload
 type Generator struct {
 	Descriptor *Descriptor
@@ -77,14 +79,39 @@ func buildField(field DescriptorField) interface{} {
 	}
 }
 
-// BuildObject -> Generates the fields and builds a payload object
-func (gen *Generator) BuildObject() []byte {
-	rand.Seed(time.Now().UnixNano())
-	obj := make(map[string]interface{})
+// horrible solution, but the interface didn't work for some reason..
+// worth checking this out better later
+func buildNestedField(field DescriptorField) jsonObject {
+	obj := make(jsonObject)
+
+	for _, f := range field.Fields {
+		if f.Fields != nil {
+			obj[f.Name] = buildNestedField(f)
+		} else {
+			obj[f.Name] = buildField(f)
+		}
+	}
+	return obj
+}
+
+// buildObject -> Generates the fields and builds a payload object
+func (gen *Generator) buildObject() jsonObject {
+	obj := make(jsonObject)
 
 	for _, f := range gen.Descriptor.Fields {
-		obj[f.Name] = buildField(f)
+		if f.Fields != nil {
+			obj[f.Name] = buildNestedField(f)
+		} else {
+			obj[f.Name] = buildField(f)
+		}
 	}
+	return obj
+}
+
+// GetData -> Returns the result of json marshal on the object
+func (gen *Generator) GetData() []byte {
+	rand.Seed(time.Now().UnixNano())
+	obj := gen.buildObject()
 
 	b, err := json.Marshal(obj)
 	if err != nil {

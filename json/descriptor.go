@@ -21,15 +21,10 @@ type DescriptorFormat struct {
 	Size  int    `json:"size"`
 }
 
-// DescriptorOptions -> struct containing all available options
-type DescriptorOptions struct {
-	Format DescriptorFormat `json:"format"`
-}
-
 // Descriptor -> an array of DescriptorField
 type Descriptor struct {
-	Fields  []DescriptorField `json:"fields"`
-	Options DescriptorOptions `json:"options"`
+	Fields []DescriptorField `json:"fields"`
+	Format DescriptorFormat  `json:"options"`
 }
 
 // NewDescriptor -> constructor for a Descriptor

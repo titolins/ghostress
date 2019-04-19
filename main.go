@@ -42,7 +42,7 @@ func main() {
 		descriptor := json.NewDescriptor(dataFile)
 		fmt.Printf("descriptor = %+v\n", descriptor)
 		generator := &json.Generator{Descriptor: descriptor}
-		data = generator.BuildObject()
+		data = generator.GetData()
 		fmt.Printf("generator.BuildObject() = %+v\n", string(data))
 	}
 	req := NewRequest(method, uri, data)
