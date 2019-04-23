@@ -24,7 +24,7 @@ type DescriptorFormat struct {
 // Descriptor -> an array of DescriptorField
 type Descriptor struct {
 	Fields []DescriptorField `json:"fields"`
-	Format DescriptorFormat  `json:"options"`
+	Format DescriptorFormat  `json:"format"`
 }
 
 // NewDescriptor -> constructor for a Descriptor

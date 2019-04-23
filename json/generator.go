@@ -9,11 +9,13 @@ import (
 )
 
 const (
-	defaultStringSize = 10
-	defaultIntSize    = 5
+	defaultStringSize    = 10
+	defaultIntSize       = 5
+	defaultJSONArraySize = 3
 )
 
 type jsonObject map[string]interface{}
+type jsonArray []jsonObject
 
 // Generator -> Receives a Descriptor and generates the appropriate json payload
 type Generator struct {
@@ -96,6 +98,7 @@ func buildNestedField(field DescriptorField) jsonObject {
 
 // buildObject -> Generates the fields and builds a payload object
 func (gen *Generator) buildObject() jsonObject {
+	rand.Seed(time.Now().UnixNano())
 	obj := make(jsonObject)
 
 	for _, f := range gen.Descriptor.Fields {
@@ -110,7 +113,24 @@ func (gen *Generator) buildObject() jsonObject {
 
 // GetData -> Returns the result of json marshal on the object
 func (gen *Generator) GetData() []byte {
-	rand.Seed(time.Now().UnixNano())
+	if gen.Descriptor.Format.Shape == "list" {
+		arrSize := gen.Descriptor.Format.Size
+		if arrSize <= 0 {
+			arrSize = int(defaultJSONArraySize)
+		}
+		arr := make(jsonArray, arrSize)
+		for i := 0; i < arrSize; i++ {
+			arr[i] = gen.buildObject()
+		}
+
+		b, err := json.Marshal(arr)
+		if err != nil {
+			panic("Failed to marshal obj")
+		}
+
+		return b
+	}
+
 	obj := gen.buildObject()
 
 	b, err := json.Marshal(obj)
