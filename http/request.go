@@ -34,15 +34,6 @@ func NewRequestGen(method string, uri string, data []byte) *RequestGen {
 	// check if method accepted
 	panicIfNotMethodAccepted(method)
 
-	/* Now using `fan.Reader` considering golang's buffer isn't thread safe. Had
-	to implement the constructor below, considering `r` and `mux` inside Reader
-	are unexported.
-	```
-	func NewReader(r io.Reader) *Reader {
-		return &Reader{r, []byte(nil), *new(sync.Mutex)}
-	}
-	```
-	*/
 	dataBuffer := fan.NewReader(bytes.NewBuffer(data))
 
 	return &RequestGen{
