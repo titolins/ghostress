@@ -1,3 +1,4 @@
+// main package of ghostress
 package main
 
 import (
@@ -55,12 +56,9 @@ func main() {
 		data = generator.GetData()
 		fmt.Printf("generator.BuildObject() = %+v\n", string(data))
 	}
-	req := http.NewRequest(method, uri, data)
 
-	stresser := &http.Stresser{
-		Request: req,
-		NReq:    nReq,
-		Timeout: timeout}
+	req := http.NewRequestGen(method, uri, data)
+	stresser := http.NewStresser(req, nReq, timeout)
 
 	stresser.Stress()
 }

@@ -2,54 +2,74 @@ package http
 
 import (
 	"fmt"
-	"io/ioutil"
+	//"io/ioutil"
 	"net/http"
 	"time"
 )
 
 // Stresser -> Describes and runs the request batch
 type Stresser struct {
-	Request *Request
-	NReq    int
-	Timeout int
+	RequestGen *RequestGen
+	NReq       int
+	Timeout    int
+	Result     *StressResult
+}
+
+// NewStresser -> builds a stresser with a response object
+func NewStresser(req *RequestGen, nReq int, timeout int) *Stresser {
+	StressResult := NewStressResult(nReq)
+	return &Stresser{
+		RequestGen: req,
+		NReq:       nReq,
+		Timeout:    timeout,
+		Result:     StressResult,
+	}
 }
 
 // req -> Makes a single request
-func (stresser *Stresser) req(ch chan<- string) {
-	var res string
+func (stresser *Stresser) req(resCh chan<- RequestSummary) {
 	httpClient := &http.Client{}
-	reqRes, err := httpClient.Do(stresser.Request.GetHTTPRequest())
-	if err != nil {
-		res = fmt.Sprintf("Error making request\n*********\n%s\n", err.Error())
-	} else {
-		defer reqRes.Body.Close()
-		//
-		rbody, rerr := ioutil.ReadAll(reqRes.Body)
-		if rerr != nil {
-			res = fmt.Sprintf(
-				"Error reading response\n***********\n%s\n", rerr.Error())
+	httpReq := stresser.RequestGen.GenHTTPRequest()
+	httpRes, err := httpClient.Do(httpReq)
+	/*
+		if err != nil {
+			textRes = fmt.Sprintf("Error making request\n*********\n%s\n", err.Error())
 		} else {
-			res = fmt.Sprintf(
-				"Request response\n*******************\n%s\n", rbody)
+			defer reqRes.Body.Close()
+			//
+			rbody, rerr := ioutil.ReadAll(reqRes.Body)
+			if rerr != nil {
+				textRes = fmt.Sprintf(
+					"Error reading response\n***********\n%s\n", rerr.Error())
+			} else {
+				textRes = fmt.Sprintf(
+					"Request response\n*******************\n%s\n", rbody)
+			}
 		}
+	*/
+	summary := &RequestSummary{
+		Request:  httpReq,
+		Response: httpRes,
+		ReqErr:   err,
 	}
-	ch <- res
+	resCh <- *summary
 }
 
 // Stress -> Starts the batch request
 func (stresser *Stresser) Stress() {
-	ch := make(chan string)
+	resCh := make(chan RequestSummary)
 
 	fmt.Println("Starting stress test")
 	fmt.Printf("stresser.NReq = %+v\n", stresser.NReq)
 	for i := 0; i < stresser.NReq; i++ {
 		fmt.Printf("i = %+v\n", i)
-		go stresser.req(ch)
+		go stresser.req(resCh)
 		time.Sleep(time.Duration(stresser.Timeout) * time.Second)
 	}
 
 	for i := 0; i < stresser.NReq; i++ {
-		fmt.Printf("<-ch = %+v\n", <-ch)
+		fmt.Printf("<-ch = %+v\n", <-resCh)
+		stresser.Result.AddResponse(<-resCh, i)
 	}
 
 	fmt.Println("Finished stress test")

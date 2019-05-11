@@ -1,4 +1,4 @@
-// Main package for ghostresser
+// Package http holds all files related to the http requests made by stresser
 package http
 
 import (
@@ -7,10 +7,11 @@ import (
 	"net/http"
 )
 
-// Request -> A wrapper whose only functionality is creating new http.Requests
-// considering the reusability on those for post/put requests is questionable:
+// RequestGen -> A wrapper whose only functionality is creating new
+// http.Requests considering the reusability on those for post/put requests is
+// questionable:
 // https://github.com/golang/go/issues/19653
-type Request struct {
+type RequestGen struct {
 	Method string
 	URI    string
 	Data   *fan.Reader
@@ -27,9 +28,9 @@ func panicIfNotMethodAccepted(method string) {
 	}
 }
 
-// NewRequest -> builds and returns a http.Request wrapper (so we can generate
-// those easily later when actually making requests)
-func NewRequest(method string, uri string, data []byte) *Request {
+// NewRequestGen -> builds and returns a http.Request wrapper (so we can
+// generate those easily later when actually making requests)
+func NewRequestGen(method string, uri string, data []byte) *RequestGen {
 	// check if method accepted
 	panicIfNotMethodAccepted(method)
 
@@ -44,7 +45,7 @@ func NewRequest(method string, uri string, data []byte) *Request {
 	*/
 	dataBuffer := fan.NewReader(bytes.NewBuffer(data))
 
-	return &Request{
+	return &RequestGen{
 		Method: method,
 		URI:    uri,
 		Data:   dataBuffer,
@@ -52,8 +53,8 @@ func NewRequest(method string, uri string, data []byte) *Request {
 
 }
 
-// GetHTTPRequest -> Returns a new *http.Request to be used with the http.Client
-func (req *Request) GetHTTPRequest() *http.Request {
+// GenHTTPRequest -> Returns a new *http.Request to be used with the http.Client
+func (req *RequestGen) GenHTTPRequest() *http.Request {
 	httpReq, err := http.NewRequest(req.Method, req.URI, req.Data.View())
 	if err != nil {
 		panic(err.Error())
