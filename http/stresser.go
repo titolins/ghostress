@@ -69,7 +69,7 @@ func (stresser *Stresser) Stress() {
 
 	for i := 0; i < stresser.NReq; i++ {
 		fmt.Printf("<-ch = %+v\n", <-resCh)
-		stresser.Result.AddResponse(<-resCh, i)
+		stresser.Result.SetResult(<-resCh, i)
 	}
 
 	fmt.Println("Finished stress test")

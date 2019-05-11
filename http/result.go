@@ -23,7 +23,7 @@ func NewStressResult(nReq int) *StressResult {
 	}
 }
 
-// AddResponse -> set the result of a given request to the response array
-func (stressRes *StressResult) AddResponse(reqSum RequestSummary, n int) {
+// SetResult -> set the result of a given request to the response array
+func (stressRes *StressResult) SetResult(reqSum RequestSummary, n int) {
 	stressRes.res[n] = reqSum
 }
