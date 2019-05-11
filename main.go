@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/titolins/ghostress/http"
 	"github.com/titolins/ghostress/json"
 	"io/ioutil"
 )
@@ -24,13 +25,22 @@ func main() {
 	flag.StringVar(&method, "method", "PUT", "method to be used (POST or PUT)")
 	flag.StringVar(&uri, "uri", "http://localhost:3000", "request uri")
 	flag.StringVar(
-		&dataFile, "data", "test_data.json", "json data or descriptor file")
+		&dataFile,
+		"data",
+		"",
+		("json data or descriptor file (depending on the value of the" +
+			"'use_data_file' parameter)"))
 	flag.BoolVar(
 		&useFile,
 		"use_data_file",
 		true,
-		"boolean indicating if a data file should be used")
+		("boolean indicating if a data file should be used (if false, a json" +
+			" descriptor should be passed as '-data')"))
 	flag.Parse()
+
+	if dataFile == "" {
+		panic("parameter 'data' cannot be null")
+	}
 
 	if useFile {
 		// reads json file
@@ -45,14 +55,12 @@ func main() {
 		data = generator.GetData()
 		fmt.Printf("generator.BuildObject() = %+v\n", string(data))
 	}
-	req := NewRequest(method, uri, data)
+	req := http.NewRequest(method, uri, data)
 
-	stresser := &Stresser{
+	stresser := &http.Stresser{
 		Request: req,
 		NReq:    nReq,
 		Timeout: timeout}
 
-	// inside if for now
 	stresser.Stress()
-
 }

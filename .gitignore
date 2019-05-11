@@ -1,3 +1,4 @@
 ghostress
 .mypy_cache
 *.json
+data

@@ -1,5 +1,5 @@
 // Main package for ghostresser
-package main
+package http
 
 import (
 	"bytes"
