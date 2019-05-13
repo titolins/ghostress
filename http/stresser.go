@@ -31,22 +31,6 @@ func (stresser *Stresser) req(resCh chan<- RequestSummary) {
 	httpClient := &http.Client{}
 	httpReq := stresser.RequestGen.GenHTTPRequest()
 	httpRes, err := httpClient.Do(httpReq)
-	/*
-		if err != nil {
-			textRes = fmt.Sprintf("Error making request\n*********\n%s\n", err.Error())
-		} else {
-			defer reqRes.Body.Close()
-			//
-			rbody, rerr := ioutil.ReadAll(reqRes.Body)
-			if rerr != nil {
-				textRes = fmt.Sprintf(
-					"Error reading response\n***********\n%s\n", rerr.Error())
-			} else {
-				textRes = fmt.Sprintf(
-					"Request response\n*******************\n%s\n", rbody)
-			}
-		}
-	*/
 	summary := &RequestSummary{
 		Request:  httpReq,
 		Response: httpRes,

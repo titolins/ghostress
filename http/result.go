@@ -2,18 +2,63 @@ package http
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"text/template"
 )
 
-const summaryTemplate = `
+const stressResultTemplate = `
+
 Stress Result:
 ==============
+
 Total requests made   : {{ .NReq }}
 Total requests failed : {{ .NReqFailed }}
 Success Rate          : {{ .GetRequestsSuccessRate }}%
+
+==============
+
 `
+const responseSummaryTemplate = `
+Response {{ .ID }}
+
+==============
+
+Body        : {{ .BodyText }}
+Status Code : {{ .StatusCode }}
+
+==============
+`
+
+type responseSummary struct {
+	ID         int
+	BodyText   string
+	StatusCode int
+	template   *template.Template
+}
+
+func newResponseSummary(res *http.Response, id int) *responseSummary {
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		body = []byte(fmt.Sprintf("Error reading response body: %s\n", err))
+	}
+
+	t, err := template.New("ResponseSummary").Parse(responseSummaryTemplate)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to parse response summary template: %s", err))
+	}
+
+	summary := &responseSummary{
+		ID:         id,
+		BodyText:   string(body),
+		StatusCode: res.StatusCode,
+		template:   t,
+	}
+
+	return summary
+}
 
 // RequestSummary -> holds a reference to both the response and request objects
 type RequestSummary struct {
@@ -32,7 +77,7 @@ type StressResult struct {
 
 // NewStressResult -> returns a StressResult with the initiated res slice
 func NewStressResult(nReq int) *StressResult {
-	t, err := template.New("RequestSummary").Parse(summaryTemplate)
+	t, err := template.New("StressResult").Parse(stressResultTemplate)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to parse summary template: %s", err))
 	}
@@ -63,4 +108,9 @@ func (stressRes *StressResult) GetRequestsSuccessRate() int {
 // PrintSummary -> Prints the stress result summary
 func (stressRes *StressResult) PrintSummary() {
 	stressRes.template.Execute(os.Stdout, stressRes)
+	fmt.Println("Printing responses...")
+	for i, sum := range stressRes.res {
+		sumObj := newResponseSummary(sum.Response, i)
+		sumObj.template.Execute(os.Stdout, sumObj)
+	}
 }
