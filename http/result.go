@@ -8,6 +8,7 @@ import (
 	"text/template"
 )
 
+// overall result template
 const stressResultTemplate = `
 Stress Result:
 ==============
@@ -20,6 +21,7 @@ Average time elapsed  : {{ .AvgTime }}ns
 ==============
 `
 
+// individual responses template
 const responseSummaryTemplate = `
 Response n. {{ .ID }}
 
