@@ -15,6 +15,7 @@ Stress Result:
 Total requests made   : {{ .NReq }}
 Total requests failed : {{ .NReqFailed }}
 Success Rate          : {{ .GetRequestsSuccessRate }}%
+Average time elapsed  : {{ .AvgTime }}ns
 
 ==============
 `
@@ -26,20 +27,22 @@ Response n. {{ .ID }}
 
 Body        : {{ .BodyText }}
 Status Code : {{ .StatusCode }}
+Time elapsed: {{ .TimeElapsed }}ns
 
 ==============
 `
 
 type responseSummary struct {
-	ID         int
-	BodyText   string
-	StatusCode int
-	template   *template.Template
+	ID          int
+	BodyText    string
+	StatusCode  int
+	TimeElapsed float64
+	template    *template.Template
 }
 
-func newResponseSummary(res *http.Response, id int) *responseSummary {
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+func newResponseSummary(requestSummary *RequestSummary, id int) *responseSummary {
+	defer requestSummary.Response.Body.Close()
+	body, err := ioutil.ReadAll(requestSummary.Response.Body)
 	if err != nil {
 		body = []byte(fmt.Sprintf("Error reading response body: %s\n", err))
 	}
@@ -50,10 +53,11 @@ func newResponseSummary(res *http.Response, id int) *responseSummary {
 	}
 
 	summary := &responseSummary{
-		ID:         id,
-		BodyText:   string(body),
-		StatusCode: res.StatusCode,
-		template:   t,
+		ID:          id,
+		BodyText:    string(body),
+		StatusCode:  requestSummary.Response.StatusCode,
+		TimeElapsed: requestSummary.TimeElapsed,
+		template:    t,
 	}
 
 	return summary
@@ -61,9 +65,10 @@ func newResponseSummary(res *http.Response, id int) *responseSummary {
 
 // RequestSummary -> holds a reference to both the response and request objects
 type RequestSummary struct {
-	Request  *http.Request
-	Response *http.Response
-	ReqErr   error
+	Request     *http.Request
+	Response    *http.Response
+	ReqErr      error
+	TimeElapsed float64
 }
 
 // StressResult -> holds the responses of the requests batch made
@@ -72,6 +77,7 @@ type StressResult struct {
 	template   *template.Template
 	NReq       int
 	NReqFailed int
+	AvgTime    float64
 }
 
 // NewStressResult -> returns a StressResult with the initiated res slice
@@ -106,10 +112,13 @@ func (stressRes *StressResult) GetRequestsSuccessRate() int {
 
 // PrintSummary -> Prints the stress result summary
 func (stressRes *StressResult) PrintSummary() {
+	var totalTimeElapsed float64
 	fmt.Println("Printing responses...")
-	for i, sum := range stressRes.res {
-		sumObj := newResponseSummary(sum.Response, i)
+	for i, summary := range stressRes.res {
+		sumObj := newResponseSummary(&summary, i)
 		sumObj.template.Execute(os.Stdout, sumObj)
+		totalTimeElapsed += sumObj.TimeElapsed
 	}
+	stressRes.AvgTime = (totalTimeElapsed / float64(len(stressRes.res)))
 	stressRes.template.Execute(os.Stdout, stressRes)
 }

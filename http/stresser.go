@@ -29,11 +29,14 @@ func NewStresser(req *RequestGen, nReq int, timeout int) *Stresser {
 func (stresser *Stresser) req(resCh chan<- RequestSummary) {
 	httpClient := &http.Client{}
 	httpReq := stresser.RequestGen.GenHTTPRequest()
+	start := time.Now()
 	httpRes, err := httpClient.Do(httpReq)
+	elapsed := time.Since(start).Seconds()
 	summary := &RequestSummary{
-		Request:  httpReq,
-		Response: httpRes,
-		ReqErr:   err,
+		Request:     httpReq,
+		Response:    httpRes,
+		ReqErr:      err,
+		TimeElapsed: elapsed,
 	}
 	resCh <- *summary
 }
