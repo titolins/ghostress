@@ -9,7 +9,6 @@ import (
 )
 
 const stressResultTemplate = `
-
 Stress Result:
 ==============
 
@@ -18,10 +17,10 @@ Total requests failed : {{ .NReqFailed }}
 Success Rate          : {{ .GetRequestsSuccessRate }}%
 
 ==============
-
 `
+
 const responseSummaryTemplate = `
-Response {{ .ID }}
+Response n. {{ .ID }}
 
 ==============
 
@@ -107,10 +106,10 @@ func (stressRes *StressResult) GetRequestsSuccessRate() int {
 
 // PrintSummary -> Prints the stress result summary
 func (stressRes *StressResult) PrintSummary() {
-	stressRes.template.Execute(os.Stdout, stressRes)
 	fmt.Println("Printing responses...")
 	for i, sum := range stressRes.res {
 		sumObj := newResponseSummary(sum.Response, i)
 		sumObj.template.Execute(os.Stdout, sumObj)
 	}
+	stressRes.template.Execute(os.Stdout, stressRes)
 }
