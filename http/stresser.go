@@ -16,7 +16,7 @@ type Stresser struct {
 
 // NewStresser -> builds a stresser with a response object
 func NewStresser(req *RequestGen, nReq int, timeout int) *Stresser {
-	StressResult := NewStressResult(nReq)
+	StressResult := NewStressResult(nReq, req.URI, req.Method)
 	return &Stresser{
 		RequestGen: req,
 		NReq:       nReq,

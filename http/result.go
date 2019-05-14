@@ -14,6 +14,8 @@ Stress Result:
 ==============
 
 Total requests made   : {{ .NReq }}
+URI requested         : {{ .URI }}
+Method                : {{ .Method }}
 Total requests failed : {{ .NReqFailed }}
 Success Rate          : {{ .GetRequestsSuccessRate }}%
 Average time elapsed  : {{ .AvgTime }}ns
@@ -76,14 +78,16 @@ type RequestSummary struct {
 // StressResult -> holds the responses of the requests batch made
 type StressResult struct {
 	res        []RequestSummary
-	template   *template.Template
+	URI        string
+	Method     string
 	NReq       int
 	NReqFailed int
 	AvgTime    float64
+	template   *template.Template
 }
 
 // NewStressResult -> returns a StressResult with the initiated res slice
-func NewStressResult(nReq int) *StressResult {
+func NewStressResult(nReq int, uri string, method string) *StressResult {
 	t, err := template.New("StressResult").Parse(stressResultTemplate)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to parse summary template: %s", err))
@@ -91,9 +95,11 @@ func NewStressResult(nReq int) *StressResult {
 
 	return &StressResult{
 		res:        make([]RequestSummary, nReq),
-		template:   t,
+		URI:        uri,
+		Method:     method,
 		NReq:       nReq,
 		NReqFailed: 0,
+		template:   t,
 	}
 }
 
